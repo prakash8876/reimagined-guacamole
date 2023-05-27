@@ -7,44 +7,58 @@ import io.matoshri.demo.exception.UserNotFoundException;
 import io.matoshri.demo.repo.UserRepository;
 import io.matoshri.demo.util.AppConstants;
 import io.matoshri.demo.util.AppUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class UserService implements IUserService {
 
-    private final UserRepository userRepository;
-    private final AppUtils appUtils;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private AppUtils appUtils;
 
+    @Async
     @Override
-    public UserDTO findByEmail(String email) {
-        log.info(AppConstants.FIND_USER + email);
-        User user = fetchByEmail(email);
-        return appUtils.mapToDTO(user);
+    public CompletableFuture<UserDTO> findByEmail(String email) {
+        CompletableFuture<UserDTO> future = CompletableFuture.supplyAsync(() -> {
+            log.info(AppConstants.FIND_USER + email);
+            User user = fetchByEmail(email);
+            return appUtils.mapToDTO(user);
+        });
+
+        return future;
     }
 
+    @Async
     @Override
-    public UserDTO findByUsernameAndPassword(String username, String password) {
+    public CompletableFuture<UserDTO> findByUsernameAndPassword(String username, String password) {
         log.info(AppConstants.FIND_USER + username);
         User user = fetchByUsernameAndPassword(username, password);
-        return appUtils.mapToDTO(user);
+        UserDTO userDTO = appUtils.mapToDTO(user);
+        return CompletableFuture.completedFuture(userDTO);
     }
 
+    @Async
     @Override
-    public List<UserDTO> findUsers() {
+    public CompletableFuture<List<UserDTO>> findUsers() {
         List<User> users = userRepository.findAll();
         log.info("Fetched users: {}", users.size());
-        return users.stream()
+        List<UserDTO> userDTOS = users.stream()
                 .map(user -> appUtils.mapToDTO(user))
-                .toList();
+                .collect(Collectors.toList());
+        return CompletableFuture.completedFuture(userDTOS);
     }
 
     @Transactional

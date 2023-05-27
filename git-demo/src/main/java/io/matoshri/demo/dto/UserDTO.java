@@ -1,11 +1,8 @@
 package io.matoshri.demo.dto;
 
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import lombok.*;
+
+import javax.validation.constraints.*;
 
 @Data
 @Builder

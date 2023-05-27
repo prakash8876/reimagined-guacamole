@@ -1,10 +1,10 @@
 package io.matoshri.demo.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 
 @Entity
